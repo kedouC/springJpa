@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/data/jpa
+		http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+		http://www.springframework.org/schema/tx
+		http://www.springframework.org/schema/tx/spring-tx.xsd">
+	<!-- 注解扫描 -->
+	<context:component-scan base-package="com.jpa.lwk.dao"/>
+	<context:component-scan base-package="com.jpa.lwk.service"/>
+	
+	<context:property-placeholder location="classpath:jdbc.properties" />
+	
+	<!-- Jpa 事务配置 -->
+    <bean class="org.springframework.orm.jpa.JpaTransactionManager"
+        id="transactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory" />
+    </bean>
+    
+    <!--jpaVendorAdapter:指定实现JPA的适配器 -->
+    <bean id="jpaVendorAdapter"
+        class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="showSql" value="true" />
+        <property name="database" value="${database}" />
+        <property name="databasePlatform" value="org.hibernate.dialect.MySQLMyISAMDialect" />
+    </bean>
+    <!-- JPA实体管理工厂的配置 -->
+    <bean
+        class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+        id="entityManagerFactory">
+        <property name="packagesToScan" value="com.jpa.lwk.entity" />
+        <property name="dataSource" ref="dataSource" />
+        <property name="jpaVendorAdapter" ref="jpaVendorAdapter" />
+        <property name="jpaProperties">
+        	<props>
+        		 <prop key="hibernate.hbm2ddl.auto">true</prop>
+                 <prop key="hibernate.hbm2ddl.auto">update</prop>
+        	</props>
+        </property>
+    </bean>
+
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+        destroy-method="close">
+        <property name="driverClassName" value="${database.driverClassName}" />
+        <property name="url" value="${database.url}" />
+        <property name="username" value="${database.username}" />
+        <property name="password" value="${database.password}" />
+        <property name="testOnBorrow" value="true" />
+        <property name="testOnReturn" value="true" />
+        <property name="testWhileIdle" value="true" />
+        <property name="timeBetweenEvictionRunsMillis" value="1800000" />
+        <property name="numTestsPerEvictionRun" value="3" />
+        <property name="minEvictableIdleTimeMillis" value="1800000" />
+        <property name="defaultAutoCommit" value="false" />
+    </bean>
+
+    <!-- Spring Data Jpa配置 -->
+    <jpa:repositories base-package="com.jpa.lwk.dao"
+        entity-manager-factory-ref="entityManagerFactory"></jpa:repositories>
+	
+
+</beans>
